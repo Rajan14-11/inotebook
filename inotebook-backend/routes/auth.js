@@ -15,9 +15,10 @@ router.post(
     body("password").isLength({ min: 5 }),
   ],
   async (req, res) => {
+    let success = false
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ success,errors: errors.array() });
     }
 
     try {
@@ -45,8 +46,9 @@ router.post(
       }
 
     const authToken = jwt.sign(data, "hii guys");
+    success=true
 
-      res.json({authToken})
+      res.json({success,authToken})
     } catch (error) {
       console.error(error.message);
       res.status(500).send("soem error occured");
@@ -61,6 +63,7 @@ router.post(
       body("password").exists(),
   ],
   async (req, res) => {
+    let success =false
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -71,6 +74,7 @@ router.post(
     try {
       let user =await User.findOne({ email });
       if (!user) {
+        success =false
         return res
           .status(400)
           .json({ error: "Please try to login with correct credentials" });
@@ -78,9 +82,10 @@ router.post(
 
       const passwordCompare =await bcrypt.compare(password, user.password);
       if (!passwordCompare) {
+        success = false
         return res
           .status(400)
-          .json({ error: "Please try to login with correct credentials" });
+          .json({success, error: "Please try to login with correct credentials" });
       }
 
       const data = {
@@ -90,7 +95,8 @@ router.post(
       };
 
       const authToken = jwt.sign(data, "hii guys");
-      res.json({ authToken });
+      success=true
+      res.json({success, authToken });
 
     } catch (error) {
       console.error(error.message);
